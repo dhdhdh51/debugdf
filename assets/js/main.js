@@ -4,18 +4,7 @@
 (function () {
   'use strict';
 
-  /* Sidebar — Bootstrap Offcanvas handles open/close automatically.
-     We only need to close it when a nav link is tapped on mobile. */
-  const sidebarEl=document.getElementById('appSidebar');
-  if(sidebarEl){
-    sidebarEl.querySelectorAll('.sidebar-link').forEach(function(link){
-      link.addEventListener('click',function(){
-        if(window.innerWidth>=992)return; // desktop: don't touch
-        var bsOffcanvas=bootstrap.Offcanvas.getInstance(sidebarEl);
-        if(bsOffcanvas)bsOffcanvas.hide();
-      });
-    });
-  }
+  /* Sidebar handled by global toggleSidebar()/closeSidebar() in header.php */
 
   /* Auto-dismiss flash */
   document.querySelectorAll('.alert.alert-success,.alert.alert-info').forEach(el=>{

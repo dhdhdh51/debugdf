@@ -183,14 +183,47 @@ code {
 .hamburger-btn:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
 @media (max-width: 991px) { .hamburger-btn { display: flex; } }
 
-/* ── Sidebar (Bootstrap Offcanvas base + our overrides) ── */
+/* ── Sidebar ── */
 .app-sidebar {
-  background: #1e2a3a !important;
-  width: 260px !important;
-  border-right: none !important;
+  position: fixed;
+  top: 0;
+  left: -280px;          /* hidden off-screen by default */
+  width: 260px;
+  height: 100vh;
+  background: #1e2a3a;
+  z-index: 1040;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  transition: left 0.25s ease;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
 }
+.app-sidebar.sidebar-open {
+  left: 0;
+}
+/* Mobile header row inside sidebar */
+.sidebar-mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.sidebar-mobile-header button {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+}
+.sidebar-mobile-header button:hover { color: #fff; }
 .sidebar-section {
   padding: 20px 16px 6px;
   font-size: 0.65rem;
@@ -209,10 +242,9 @@ code {
   color: #adb5bd;
   font-size: 0.875rem;
   font-weight: 500;
-  transition: background 0.2s, color 0.2s;
-  cursor: pointer;
-  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
   text-decoration: none;
+  white-space: nowrap;
 }
 .sidebar-link i { font-size: 1rem; flex-shrink: 0; width: 18px; text-align: center; }
 .sidebar-link:hover  { background: rgba(255,255,255,0.08); color: #fff; text-decoration: none; }
@@ -221,30 +253,21 @@ code {
 .sidebar-link.danger { color: #f87171; }
 .sidebar-link.danger:hover { background: rgba(239,68,68,0.15); color: #fca5a5; }
 
-/* Desktop — override Bootstrap offcanvas to be permanently visible */
+/* Desktop — sidebar always visible, starts at navbar bottom */
 @media (min-width: 992px) {
   .app-sidebar {
-    position: fixed !important;
-    top: 60px !important;
-    top: var(--navbar-h, 60px) !important;
-    left: 0 !important;
-    height: calc(100vh - 60px) !important;
-    height: calc(100vh - var(--navbar-h, 60px)) !important;
-    transform: none !important;
-    visibility: visible !important;
-    z-index: 1020 !important;
-    transition: none !important;
+    left: 0;
+    top: 60px;
+    height: calc(100vh - 60px);
+    transition: none;
   }
-  /* Hide Bootstrap's offcanvas backdrop on desktop */
-  .offcanvas-backdrop { display: none !important; }
-  .hamburger-btn      { display: none !important; }
-  .main-content       { margin-left: 260px; margin-left: var(--sidebar-w, 260px); }
-  .app-footer         { margin-left: 260px; margin-left: var(--sidebar-w, 260px); }
+  .sidebar-mobile-header { display: none; }
+  .hamburger-btn   { display: none !important; }
+  .main-content    { margin-left: 260px; }
+  .app-footer      { margin-left: 260px; }
 }
-
-/* Mobile — sidebar is full-height Bootstrap offcanvas */
+/* Mobile — no content shift */
 @media (max-width: 991.98px) {
-  .app-sidebar { top: 0 !important; height: 100vh !important; z-index: 1045 !important; }
   .main-content { margin-left: 0 !important; }
   .app-footer   { margin-left: 0 !important; }
 }

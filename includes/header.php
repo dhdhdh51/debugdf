@@ -81,14 +81,16 @@ $notifs = get_notifications(8);
 </head>
 <body>
 
+<!-- ── Sidebar overlay (click to close) ── -->
+<div id="sidebarOverlay" onclick="closeSidebar()"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1030;cursor:pointer;"></div>
 
 <!-- ── Navbar ── -->
 <nav class="app-navbar">
-  <!-- Hamburger (mobile only — Bootstrap offcanvas trigger) -->
-  <button class="hamburger-btn d-lg-none" type="button"
-          data-bs-toggle="offcanvas" data-bs-target="#appSidebar"
-          aria-controls="appSidebar" aria-label="Toggle menu">
-    <i class="bi bi-list fs-5"></i>
+  <!-- Hamburger -->
+  <button type="button" class="hamburger-btn" id="hamburgerBtn"
+          onclick="toggleSidebar()">
+    <i class="bi bi-list fs-5" id="hamburgerIcon"></i>
   </button>
 
   <!-- Brand -->
@@ -177,18 +179,15 @@ $notifs = get_notifications(8);
   </div>
 </nav>
 
-<!-- ── Sidebar (Bootstrap Offcanvas on mobile, fixed on desktop) ── -->
-<aside class="offcanvas offcanvas-start app-sidebar" id="appSidebar" tabindex="-1">
+<!-- ── Sidebar ── -->
+<aside class="app-sidebar" id="appSidebar">
 
-  <!-- Close button shown only on mobile -->
-  <div class="d-flex d-lg-none align-items-center justify-content-between px-3 py-2"
-       style="border-bottom:1px solid rgba(255,255,255,0.08);">
-    <span style="color:#fff;font-weight:700;font-size:0.9rem;"><?= sanitize($site_name) ?></span>
-    <button type="button" class="btn-close btn-close-white btn-sm"
-            data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  <!-- Mobile header with close button -->
+  <div class="sidebar-mobile-header">
+    <span><?= sanitize($site_name) ?></span>
+    <button type="button" onclick="closeSidebar()">✕</button>
   </div>
 
-  <!-- Nav links -->
   <nav style="overflow-y:auto;flex:1;padding-bottom:20px;">
     <?php
     $prev_was_section = false;
@@ -215,12 +214,40 @@ $notifs = get_notifications(8);
     </a>
     <?php endforeach; ?>
     <div class="mt-3 mx-2" style="border-top:1px solid rgba(255,255,255,0.05);padding-top:12px;">
-      <a href="<?= SITE_URL ?>/auth/logout.php" class="sidebar-link danger">
+      <a href="<?= SITE_URL ?>/auth/logout.php" class="sidebar-link danger" onclick="closeSidebar()">
         <i class="bi bi-box-arrow-right"></i><span>Logout</span>
       </a>
     </div>
   </nav>
+
 </aside>
+
+<script>
+// Global sidebar functions — inline onclick, no event listeners needed
+function toggleSidebar() {
+  var s = document.getElementById('appSidebar');
+  var o = document.getElementById('sidebarOverlay');
+  var i = document.getElementById('hamburgerIcon');
+  if (!s) return;
+  if (s.classList.contains('sidebar-open')) {
+    s.classList.remove('sidebar-open');
+    o.style.display = 'none';
+    i.className = 'bi bi-list fs-5';
+  } else {
+    s.classList.add('sidebar-open');
+    o.style.display = 'block';
+    i.className = 'bi bi-x-lg fs-5';
+  }
+}
+function closeSidebar() {
+  var s = document.getElementById('appSidebar');
+  var o = document.getElementById('sidebarOverlay');
+  var i = document.getElementById('hamburgerIcon');
+  if (s) s.classList.remove('sidebar-open');
+  if (o) o.style.display = 'none';
+  if (i) i.className = 'bi bi-list fs-5';
+}
+</script>
 
 <!-- ── Main Content ── -->
 <main class="main-content" id="mainContent">
