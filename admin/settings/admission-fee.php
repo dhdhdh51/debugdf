@@ -73,9 +73,9 @@ include INCLUDES_PATH . 'header.php';
     </strong><br>
     <small class="opacity-75">
       <?php if (($s['admission_fee_enabled'] ?? '0') === '1'): ?>
-        Applicants will be charged <?= get_setting('currency_symbol','₹') . number_format((float)($s['admission_fee_amount'] ?? 0), 2) ?>
-        as "<?= sf($s, 'admission_fee_type', 'Admission Fee') ?>" when their admission is
-        <strong>approved</strong>.
+        Applicants are charged <?= get_setting('currency_symbol','₹') . number_format((float)($s['admission_fee_amount'] ?? 0), 2) ?>
+        as "<?= sf($s, 'admission_fee_type', 'Admission Fee') ?>" at the time of
+        <strong>submission</strong>. Invoice is created immediately.
       <?php else: ?>
         No fee is charged to applicants. Toggle ON below to enable.
       <?php endif; ?>
@@ -163,11 +163,12 @@ include INCLUDES_PATH . 'header.php';
       <div class="card-body">
         <ol class="mb-0 lh-lg">
           <li>Toggle <strong>Enable Admission Fee</strong> to ON.</li>
-          <li>Set the fee amount and label (e.g. "Registration Fee").</li>
-          <li>When a student <strong>applies</strong> online, the admission form shows a note about the fee.</li>
-          <li>When admin <strong>approves</strong> an admission, a fee invoice is automatically created for the student.</li>
-          <li>The invoice appears in <strong>Admin → Fees</strong> and in the student's fee portal.</li>
-          <li>Student can pay online via PayU or the school can mark it paid manually.</li>
+          <li>Set the fee amount, label (e.g. "Registration Fee"), and due days.</li>
+          <li>The admission form shows the fee amount and note to the applicant before they submit.</li>
+          <li>When an applicant <strong>submits</strong> the form, a fee invoice is <strong>immediately</strong> created (invoice no: <code>ADM-&lt;AppID&gt;</code>).</li>
+          <li>The invoice appears in <strong>Admin → Fees</strong> with status <em>Pending</em>.</li>
+          <li>Admin reviews the application and approves/rejects independently of fee payment.</li>
+          <li>School can mark the fee paid manually, or the applicant pays online via PayU (if configured).</li>
         </ol>
       </div>
     </div>

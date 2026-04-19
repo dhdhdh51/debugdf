@@ -1,9 +1,8 @@
 <?php
 /**
- * admin/admissions/index.php  (UPDATED)
- * — When admission_fee_enabled = 1 and admin approves an application,
- *   a fee invoice is auto-created for the student (if a student record exists).
- * — If no student record yet, the fee will be created when student is added.
+ * admin/admissions/index.php
+ * — Fee invoice is created at the time of submission (not on approval).
+ * — Admin reviews applications and sets status (approved/rejected/pending).
  */
 require_once dirname(__DIR__, 2) . '/config/config.php';
 require_once INCLUDES_PATH . 'auth_check.php';
@@ -40,82 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
             SchoolMailer::sendAdmissionStatus($adm['email'], $adm['name'], $status, $remarks);
         }
 
-        // ── Auto-create fee invoice on approval ───────────────
-        if ($status === 'approved' && $adm) {
-            $fee_enabled = get_setting('admission_fee_enabled', '0');
-            if ($fee_enabled === '1') {
-                $fee_amount   = (float) get_setting('admission_fee_amount', '0');
-                $fee_type     = get_setting('admission_fee_type', 'Admission Fee');
-                $due_days     = (int)   get_setting('admission_fee_due_days', '30');
-
-                if ($fee_amount > 0) {
-                    // Check if fee already created for this application
-                    $dup_check = $pdo->prepare(
-                        "SELECT id FROM fees WHERE invoice_no LIKE ? LIMIT 1"
-                    );
-                    $dup_check->execute(['ADM-' . $adm['application_id'] . '%']);
-
-                    if (!$dup_check->fetch()) {
-                        // Try to find matching student record
-                        $stu_stmt = $pdo->prepare(
-                            "SELECT id, user_id FROM students WHERE name = ? AND status='active' ORDER BY created_at DESC LIMIT 1"
-                        );
-                        $stu_stmt->execute([$adm['name']]);
-                        $stu = $stu_stmt->fetch();
-
-                        $due_date   = date('Y-m-d', strtotime("+{$due_days} days"));
-                        $invoice_no = 'ADM-' . $adm['application_id'] . '-' . date('His');
-
-                        if ($stu) {
-                            // Student exists — create proper fee record
-                            $pdo->prepare(
-                                "INSERT INTO fees (student_id, fee_type, amount, due_date, status, invoice_no, created_by)
-                                 VALUES (?, ?, ?, ?, 'pending', ?, ?)"
-                            )->execute([
-                                $stu['id'], $fee_type, $fee_amount,
-                                $due_date, $invoice_no, $_SESSION['user_id']
-                            ]);
-
-                            // In-app notification for student
-                            create_notification(
-                                $stu['user_id'] ?? null,
-                                'student',
-                                'Admission Fee Invoice',
-                                "Invoice {$invoice_no} for {$fee_type}: " . currency_format($fee_amount),
-                                'warning'
-                            );
-
-                            // Email student
-                            $email_to = $stu['email'] ?? $adm['email'] ?? '';
-                            if ($email_to) {
-                                SchoolMailer::sendFeeInvoice(
-                                    $email_to, $adm['name'],
-                                    $invoice_no, $fee_amount, $due_date
-                                );
-                            }
-                        } else {
-                            // No student record yet — store as a placeholder with student_id = 0
-                            // We use a temporary workaround: store in fees table with student_id=NULL
-                            // and tag via invoice_no so admin can re-assign later.
-                            // NOTE: This requires a nullable student_id in fees table (see SQL migration).
-                            try {
-                                $pdo->prepare(
-                                    "INSERT INTO fees (student_id, fee_type, amount, due_date, status, invoice_no, created_by)
-                                     VALUES (NULL, ?, ?, ?, 'pending', ?, ?)"
-                                )->execute([
-                                    $fee_type . ' [' . $adm['name'] . ']',
-                                    $fee_amount, $due_date, $invoice_no, $_SESSION['user_id']
-                                ]);
-                            } catch (PDOException $e) {
-                                // student_id NOT NULL constraint — skip placeholder, admin assigns manually
-                                error_log('[Admission Fee] Could not create placeholder fee: ' . $e->getMessage());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        // ── end auto-fee ──────────────────────────────────────
+        // Fee invoice was already created at submission time — nothing to do here.
 
         set_flash('success', "Admission status updated to '{$status}'.");
     }
@@ -178,7 +102,7 @@ include INCLUDES_PATH . 'header.php';
     <span>
       <strong>Admission Fee Active:</strong>
       <?= get_setting('currency_symbol','₹') . number_format($adm_fee_amount, 2) ?>
-      as "<?= sanitize($adm_fee_type) ?>" — auto-invoiced on approval.
+      as "<?= sanitize($adm_fee_type) ?>" — invoice created at submission time.
     </span>
   <?php else: ?>
     <span>Admission fee is <strong>disabled</strong>.</span>
@@ -280,8 +204,20 @@ include INCLUDES_PATH . 'header.php';
               <?php endif; ?>
             </td>
             <td class="text-end">
+              <?php
+                $docs = array_filter([
+                    'Aadhar'     => $a['doc_aadhar']        ?? '',
+                    'Birth Cert' => $a['doc_birth_cert']    ?? '',
+                    'TC'         => $a['doc_transfer_cert'] ?? '',
+                    'Photo'      => $a['doc_photo']         ?? '',
+                ]);
+                $docs_json = json_encode(array_map(
+                    fn($label, $file) => ['label' => $label, 'url' => get_upload_url($file)],
+                    array_keys($docs), array_values($docs)
+                ));
+              ?>
               <button class="btn btn-outline-primary btn-sm"
-                      onclick="openReview(<?= $a['id'] ?>, '<?= addslashes(sanitize($a['name'])) ?>', '<?= $a['status'] ?>', '<?= addslashes(sanitize($a['remarks'] ?? '')) ?>')">
+                      onclick="openReview(<?= $a['id'] ?>, '<?= addslashes(sanitize($a['name'])) ?>', '<?= $a['status'] ?>', '<?= addslashes(sanitize($a['remarks'] ?? '')) ?>', <?= htmlspecialchars($docs_json, ENT_QUOTES) ?>)">
                 <i class="bi bi-eye me-1"></i>Review
               </button>
             </td>
@@ -304,13 +240,17 @@ include INCLUDES_PATH . 'header.php';
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
+        <!-- Documents section (populated via JS) -->
+        <div id="modalDocs" class="mb-3 d-none">
+          <div class="fw-semibold small mb-2"><i class="bi bi-folder2-open me-1 text-primary"></i>Submitted Documents</div>
+          <div id="modalDocsGrid" class="row g-2 small"></div>
+        </div>
         <?php if ($adm_fee_on && $adm_fee_amount > 0): ?>
         <div class="alert alert-info py-2 small mb-3">
           <i class="bi bi-cash-stack me-1"></i>
-          Approving will auto-create a
-          <strong><?= sanitize($adm_fee_type) ?></strong> invoice of
+          A <strong><?= sanitize($adm_fee_type) ?></strong> invoice of
           <strong><?= get_setting('currency_symbol','₹') . number_format($adm_fee_amount, 2) ?></strong>
-          for this student.
+          was created when this applicant submitted. Check the Fee column for payment status.
         </div>
         <?php endif; ?>
         <form method="POST" id="reviewForm">
@@ -347,12 +287,38 @@ include INCLUDES_PATH . 'header.php';
 </div>
 
 <script>
-function openReview(id, name, status, remarks) {
+function openReview(id, name, status, remarks, docs) {
   document.getElementById('modal_admission_id').value = id;
   document.getElementById('modalName').textContent    = name;
   document.getElementById('modal_remarks').value      = remarks;
   const radio = document.getElementById('st_' + status);
   if (radio) radio.checked = true;
+
+  // Show submitted documents
+  const docsWrap = document.getElementById('modalDocs');
+  const docsGrid = document.getElementById('modalDocsGrid');
+  docsGrid.innerHTML = '';
+  if (docs && docs.length) {
+    docs.forEach(d => {
+      const isImg = /\.(jpg|jpeg|png|gif|webp)$/i.test(d.url);
+      docsGrid.innerHTML += `
+        <div class="col-6">
+          <a href="${d.url}" target="_blank" class="d-flex align-items-center gap-2 p-2 border rounded text-decoration-none text-dark bg-light">
+            ${isImg
+              ? `<img src="${d.url}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" alt="${d.label}">`
+              : `<i class="bi bi-file-earmark-pdf fs-3 text-danger"></i>`}
+            <div>
+              <div class="fw-semibold" style="font-size:.78rem;">${d.label}</div>
+              <div class="text-primary" style="font-size:.7rem;">View / Download</div>
+            </div>
+          </a>
+        </div>`;
+    });
+    docsWrap.classList.remove('d-none');
+  } else {
+    docsWrap.classList.add('d-none');
+  }
+
   new bootstrap.Modal(document.getElementById('reviewModal')).show();
 }
 </script>
