@@ -6,11 +6,31 @@
 
   /* Sidebar */
   const sidebar=document.getElementById('appSidebar'),overlay=document.getElementById('sidebarOverlay'),hamburger=document.getElementById('hamburgerBtn');
-  function openSidebar(){if(!sidebar)return;sidebar.classList.add('open');overlay?.classList.add('open');document.body.style.overflow='hidden';}
-  function closeSidebar(){if(!sidebar)return;sidebar.classList.remove('open');overlay?.classList.remove('open');document.body.style.overflow='';}
+  function setHamburgerIcon(open){
+    const i=hamburger?.querySelector('i');
+    if(i)i.className=open?'bi bi-x fs-5':'bi bi-list fs-5';
+  }
+  function openSidebar(){
+    if(!sidebar)return;
+    sidebar.classList.add('open');
+    overlay?.classList.add('open');
+    document.body.style.overflow='hidden';
+    setHamburgerIcon(true);
+  }
+  function closeSidebar(){
+    if(!sidebar)return;
+    sidebar.classList.remove('open');
+    overlay?.classList.remove('open');
+    document.body.style.overflow='';
+    setHamburgerIcon(false);
+  }
   hamburger?.addEventListener('click',()=>sidebar?.classList.contains('open')?closeSidebar():openSidebar());
   overlay?.addEventListener('click',closeSidebar);
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSidebar();});
+  // Close sidebar when a nav link is tapped on mobile
+  sidebar?.querySelectorAll('.sidebar-link').forEach(link=>{
+    link.addEventListener('click',()=>{if(window.innerWidth<992)closeSidebar();});
+  });
 
   /* Auto-dismiss flash */
   document.querySelectorAll('.alert.alert-success,.alert.alert-info').forEach(el=>{
