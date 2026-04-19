@@ -27,7 +27,7 @@ include INCLUDES_PATH.'header.php';
 <tr><td><code><?=sanitize($f['invoice_no'])?></code></td><td style="font-size:0.85rem;"><?=sanitize($f['fee_type'])?></td>
 <td style="font-weight:700;color:<?=$f['status']==='paid'?'#22c55e':'#ef4444'?>"><?=currency_format((float)$f['amount'])?></td>
 <td style="font-size:0.8rem;color:<?=$f['due_date']&&$f['due_date']<date('Y-m-d')&&$f['status']==='pending'?'#ef4444':'var(--text-muted)'?>"><?=format_date($f['due_date'])?></td>
-<td><span class="badge bg-<?=match($f['status']){'paid'=>'success','overdue'=>'danger',default=>'warning'}"><?=ucfirst($f['status'])?></span></td>
+<td><span class="badge bg-<?=match($f['status']){'paid'=>'success','overdue'=>'danger',default=>'warning'}?>"><?=ucfirst($f['status'])?></span></td>
 <td><?php if($f['status']!=='paid'&&!empty($payu_key)):?><button class="btn btn-primary btn-sm" onclick="payNow(<?=$f['id']?>,'<?=sanitize($f['invoice_no'])?>',<?=$f['amount']?>)"><i class="bi bi-credit-card me-1"></i>Pay</button><?php elseif($f['status']!=='paid'):?><span style="font-size:0.78rem;color:var(--text-muted);">Contact office</span><?php else:?><span style="color:#22c55e;font-size:0.78rem;"><i class="bi bi-check-circle me-1"></i>Paid</span><?php endif;?></td></tr>
 <?php endforeach;endif;?>
 </tbody></table></div></div>

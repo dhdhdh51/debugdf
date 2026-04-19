@@ -40,7 +40,7 @@ include INCLUDES_PATH.'header.php';
                 <td><code><?=sanitize($sub['code']??'—')?></code></td>
                 <td><?=sanitize($sub['class_name']??'All Classes')?></td>
                 <td class="text-end">
-                  <button class="btn btn-outline-warning btn-sm me-1" onclick="editSubject(<?=$sub['id']?>,'<?=addslashes(sanitize($sub['name']))??>','<?=sanitize($sub['code']??'')??>',<?=$sub['class_id']??0?>)"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-outline-warning btn-sm me-1" onclick="editSubject(<?=$sub['id']?>,'<?=addslashes(sanitize($sub['name']))?>','<?=sanitize($sub['code']??'')?>',<?=$sub['class_id']??0?>)"><i class="bi bi-pencil"></i></button>
                   <form method="POST" class="d-inline" onsubmit="return confirm('Delete?')"><?=csrf_field()?><input type="hidden" name="action" value="delete"><input type="hidden" name="subject_id" value="<?=$sub['id']?>"><button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button></form>
                 </td>
               </tr>

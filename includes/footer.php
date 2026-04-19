@@ -2,7 +2,7 @@
 </main><!-- /.main-content -->
 
 <footer class="app-footer" style="margin-left:0;">
-  <div style="font-size:0.76rem;color:rgba(255,255,255,0.2);">
+  <div style="font-size:0.76rem;color:var(--text-muted);">
     <?= sanitize(get_setting('footer_text','© '.date('Y').' School ERP')) ?>
     &nbsp;·&nbsp; v<?= APP_VERSION ?>
   </div>

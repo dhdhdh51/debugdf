@@ -98,7 +98,7 @@ $notifs = get_notifications(8);
     <?php else: ?>
       <div class="brand-icon">🎓</div>
     <?php endif; ?>
-    <span class="brand d-none d-sm-flex" style="font-family:'Playfair Display',serif;font-size:1rem;color:#fff;font-weight:700;">
+    <span class="brand d-none d-sm-flex" style="font-size:1rem;color:var(--text-main);font-weight:700;">
       <?= sanitize($site_name) ?>
     </span>
   </a>
@@ -119,10 +119,10 @@ $notifs = get_notifications(8);
       </button>
       <div class="dropdown-menu dropdown-menu-end" style="min-width:300px;max-height:420px;overflow-y:auto;">
         <div class="dropdown-item-text d-flex justify-content-between align-items-center py-2">
-          <span style="font-weight:700;color:#fff;font-size:0.875rem;">Notifications</span>
+          <span style="font-weight:700;color:var(--text-main);font-size:0.875rem;">Notifications</span>
           <?php if ($unread > 0): ?>
           <a href="<?= SITE_URL ?>/notifications/mark-all.php"
-             style="font-size:0.72rem;color:var(--gold);">Mark all read</a>
+             style="font-size:0.72rem;color:var(--primary);">Mark all read</a>
           <?php endif; ?>
         </div>
         <div class="dropdown-divider"></div>
@@ -132,17 +132,17 @@ $notifs = get_notifications(8);
         </div>
         <?php else: foreach ($notifs as $n):
           $nicons=['success'=>'check-circle','warning'=>'exclamation-triangle','danger'=>'x-circle','info'=>'info-circle'];
-          $ncolors=['success'=>'#22c55e','warning'=>'var(--gold)','danger'=>'#ef4444','info'=>'#4f8ef7'];
+          $ncolors=['success'=>'#16a34a','warning'=>'#d97706','danger'=>'#dc2626','info'=>'#1a6dcc'];
           $ni = $nicons[$n['type']] ?? 'info-circle';
           $nc = $ncolors[$n['type']] ?? '#4f8ef7';
         ?>
         <a class="dropdown-item notif-item py-2"
            href="<?= SITE_URL ?>/notifications/read.php?id=<?= $n['id'] ?>"
-           style="<?= !$n['is_read'] ? 'background:rgba(255,255,255,0.03);' : '' ?>">
+           style="<?= !$n['is_read'] ? 'background:var(--primary-light);' : '' ?>">
           <div style="display:flex;align-items:flex-start;gap:10px;">
             <i class="bi bi-<?= $ni ?> mt-1 flex-shrink-0" style="color:<?= $nc ?>;font-size:0.9rem;"></i>
             <div>
-              <div style="font-size:0.8rem;color:#fff;font-weight:<?= !$n['is_read']?'600':'400'?>;"><?= sanitize($n['title']) ?></div>
+              <div style="font-size:0.8rem;color:var(--text-main);font-weight:<?= !$n['is_read']?'600':'400'?>;"><?= sanitize($n['title']) ?></div>
               <div style="font-size:0.72rem;color:var(--text-muted);"><?= date('d M, h:i A',strtotime($n['created_at'])) ?></div>
             </div>
           </div>
@@ -159,8 +159,8 @@ $notifs = get_notifications(8);
       <ul class="dropdown-menu dropdown-menu-end">
         <li>
           <div class="dropdown-item-text">
-            <div style="font-weight:700;font-size:0.875rem;color:#fff;"><?= sanitize($_SESSION['user_name'] ?? '') ?></div>
-            <div style="font-size:0.72rem;color:var(--gold);text-transform:capitalize;"><?= $role ?></div>
+            <div style="font-weight:700;font-size:0.875rem;color:var(--text-main);"><?= sanitize($_SESSION['user_name'] ?? '') ?></div>
+            <div style="font-size:0.72rem;color:var(--primary);text-transform:capitalize;"><?= $role ?></div>
           </div>
         </li>
         <li><div class="dropdown-divider"></div></li>
@@ -217,7 +217,7 @@ $notifs = get_notifications(8);
     <!-- Page header row -->
     <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
       <div>
-        <h5 style="font-family:'Playfair Display',serif;font-weight:700;color:#fff;margin:0;">
+        <h5 style="font-weight:700;color:var(--text-main);margin:0;">
           <?= sanitize($page_title) ?>
         </h5>
         <?php if (!empty($breadcrumb)): ?>

@@ -9,7 +9,7 @@ ini_set('session.use_strict_mode', 1);
 ini_set('session.cookie_samesite', 'Lax');
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-define('DB_HOST',    'localhost');
+define('DB_HOST',    '127.0.0.1');
 define('DB_USER',    'root');
 define('DB_PASS',    '');
 define('DB_NAME',    'school_erp');

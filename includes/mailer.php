@@ -60,7 +60,6 @@ class SchoolMailer {
     }
     private function connect(): mixed {
         $context=stream_context_create(['ssl'=>['verify_peer'=>false,'verify_peer_name'=>false,'allow_self_signed'=>true]]);
-        $target=($this->encryption==='ssl'||$this->port===465)??"ssl://{$this->host}:{$this->port}":"tcp://{$this->host}:{$this->port}";
         $target=($this->encryption==='ssl'||$this->port===465)?"ssl://{$this->host}:{$this->port}":"tcp://{$this->host}:{$this->port}";
         $socket=@stream_socket_client($target,$errno,$errstr,15,STREAM_CLIENT_CONNECT,$context);
         if ($socket===false) { $this->errors[]="SMTP Connection failed: {$errstr} ({$errno})"; return false; }
