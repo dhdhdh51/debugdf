@@ -1,0 +1,13 @@
+# Block all web access to this folder once installation is complete.
+# The installer itself creates .installed when done.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{DOCUMENT_ROOT}/install/.installed -f
+    RewriteRule ^ - [F,L]
+</IfModule>
+
+# Also block direct access to the .installed flag file
+<Files ".installed">
+    Order Deny,Allow
+    Deny from all
+</Files>

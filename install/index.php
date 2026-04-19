@@ -99,7 +99,7 @@ define('CSRF_TOKEN_LENGTH', 32);
 define('OTP_EXPIRY_MINUTES', 10);
 define('SESSION_TIMEOUT',    1800);
 define('APP_NAME',           'School ERP System');
-define('APP_VERSION',        '1.0.0');
+define('APP_VERSION',        '2.0.0');
 define('ACADEMIC_YEAR',      '2025-2026');
 define('PASS_PERCENTAGE',     33);
 define('MAX_FILE_SIZE',      5 * 1024 * 1024);
@@ -250,39 +250,92 @@ $steps_meta = [
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="../assets/css/style.css" rel="stylesheet">
   <style>
-    body { min-height: 100vh; background: var(--navy); display: flex; align-items: center; justify-content: center; padding: 30px 16px; }
+    /* Installer uses its own self-contained dark theme — independent of style.css */
+    :root {
+      --i-bg:        #0a0f1e;
+      --i-surface:   #0f1729;
+      --i-border:    rgba(255,255,255,0.09);
+      --i-text:      #e8eaf6;
+      --i-muted:     #8892b0;
+      --i-gold:      #f5a623;
+      --i-gold-dark: #c47f0a;
+      --i-green:     #22c55e;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      background: var(--i-bg);
+      color: var(--i-text);
+      font-family: 'Inter', system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 16px;
+      margin: 0;
+    }
     body::before {
       content:'';
-      position:fixed;inset:0;
-      background-image:linear-gradient(rgba(245,166,35,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(245,166,35,0.025) 1px,transparent 1px);
-      background-size:50px 50px;pointer-events:none;
+      position:fixed; inset:0;
+      background-image:
+        linear-gradient(rgba(245,166,35,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,166,35,0.025) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
     }
+    /* Override Bootstrap defaults for dark bg */
+    .form-control, .form-select {
+      background: rgba(255,255,255,0.05) !important;
+      border: 1px solid var(--i-border) !important;
+      border-radius: 10px !important;
+      color: var(--i-text) !important;
+      padding: 10px 14px !important;
+    }
+    .form-control:focus, .form-select:focus {
+      background: rgba(255,255,255,0.08) !important;
+      border-color: var(--i-gold) !important;
+      box-shadow: 0 0 0 3px rgba(245,166,35,0.15) !important;
+      color: #fff !important;
+      outline: none;
+    }
+    .form-control::placeholder { color: var(--i-muted) !important; }
+    .form-select option { background: #131d35; color: var(--i-text); }
+    .form-label { font-size: 0.8rem; font-weight: 600; color: var(--i-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .form-text { color: var(--i-muted) !important; font-size: 0.78rem; }
+    .form-text code { background: rgba(79,142,247,0.15); color: #7ec8ff; padding: 1px 5px; border-radius: 4px; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--i-gold), var(--i-gold-dark)) !important;
+      border: none !important;
+      color: var(--i-bg) !important;
+      font-weight: 600;
+      border-radius: 10px !important;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary {
+      background: rgba(255,255,255,0.08) !important;
+      border: 1px solid var(--i-border) !important;
+      color: var(--i-text) !important;
+      font-weight: 600;
+      border-radius: 10px !important;
+    }
+    .alert-danger  { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; border-radius: 10px; }
+    .alert-danger code { background: rgba(239,68,68,0.15); color: #fca5a5; }
+    code { background: rgba(79,142,247,0.15); color: #7ec8ff; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; }
+
     .install-wrap { width: 100%; max-width: 600px; position: relative; z-index: 1; }
-    .install-header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
+    .install-header { text-align: center; margin-bottom: 32px; }
     .install-logo {
       width: 72px; height: 72px;
       border-radius: 20px;
-      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      background: linear-gradient(135deg, var(--i-gold), var(--i-gold-dark));
       display: flex; align-items: center; justify-content: center;
       font-size: 2rem;
       margin: 0 auto 16px;
       box-shadow: 0 8px 32px rgba(245,166,35,0.35);
     }
-    .steps-bar {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      margin-bottom: 32px;
-    }
+    .steps-bar { display: flex; align-items: center; gap: 0; margin-bottom: 32px; }
     .steps-bar .step-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex: 1;
-      position: relative;
+      display: flex; flex-direction: column; align-items: center;
+      flex: 1; position: relative;
     }
     .steps-bar .step-item::after {
       content: '';
@@ -291,46 +344,55 @@ $steps_meta = [
       left: calc(50% + 18px);
       right: calc(-50% + 18px);
       height: 2px;
-      background: var(--border);
+      background: var(--i-border);
     }
     .steps-bar .step-item:last-child::after { display: none; }
-    .steps-bar .step-item.done::after { background: var(--gold); }
+    .steps-bar .step-item.done::after { background: var(--i-gold); }
     .step-num {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      border: 2px solid var(--border);
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid var(--i-border);
       background: rgba(255,255,255,0.04);
-      color: var(--text-muted);
+      color: var(--i-muted);
       display: flex; align-items: center; justify-content: center;
       font-size: 0.8rem; font-weight: 700;
-      transition: all 0.3s;
-      position: relative;
-      z-index: 1;
+      transition: all 0.3s; position: relative; z-index: 1;
     }
-    .step-item.active .step-num { background: var(--gold); border-color: var(--gold); color: var(--navy); box-shadow: 0 0 0 4px rgba(245,166,35,0.2); }
-    .step-item.done .step-num   { background: #22c55e; border-color: #22c55e; color: #fff; }
-    .step-label { font-size: 0.65rem; color: var(--text-muted); margin-top: 6px; white-space: nowrap; }
-    .step-item.active .step-label { color: var(--gold); }
+    .step-item.active .step-num { background: var(--i-gold); border-color: var(--i-gold); color: var(--i-bg); box-shadow: 0 0 0 4px rgba(245,166,35,0.2); }
+    .step-item.done .step-num   { background: var(--i-green); border-color: var(--i-green); color: #fff; }
+    .step-label { font-size: 0.65rem; color: var(--i-muted); margin-top: 6px; white-space: nowrap; }
+    .step-item.active .step-label { color: var(--i-gold); }
     .step-item.done .step-label   { color: #4ade80; }
     .install-card {
-      background: var(--navy-2);
-      border: 1px solid var(--border);
+      background: var(--i-surface);
+      border: 1px solid var(--i-border);
       border-radius: 20px;
       padding: 32px;
       box-shadow: 0 24px 64px rgba(0,0,0,0.4);
     }
     .req-row {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 14px;
-      border-radius: 10px;
+      padding: 10px 14px; border-radius: 10px;
       background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-      margin-bottom: 8px;
-      font-size: 0.875rem;
+      border: 1px solid var(--i-border);
+      margin-bottom: 8px; font-size: 0.875rem;
     }
-    .req-row .name { color: var(--text-main); }
+    .req-row .name { color: var(--i-text); }
     .req-row .pass { color: #4ade80; }
     .req-row .fail { color: #f87171; }
+    .success-box {
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.25);
+      border-radius: 12px; padding: 16px;
+      margin-bottom: 24px; font-size: 0.85rem; color: #4ade80;
+    }
+    .creds-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--i-border);
+      border-radius: 12px; padding: 16px;
+      margin-bottom: 28px;
+    }
+    .creds-box .creds-label { font-size: 0.8rem; color: var(--i-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .creds-box .creds-text { color: var(--i-text); font-size: 0.875rem; }
   </style>
 </head>
 <body>
@@ -338,8 +400,8 @@ $steps_meta = [
   <!-- Header -->
   <div class="install-header">
     <div class="install-logo">🎓</div>
-    <h2 style="font-family:'Playfair Display',serif;color:#fff;margin-bottom:4px;">School ERP Installer</h2>
-    <p style="color:var(--text-muted);font-size:0.875rem;">Follow the steps to get your ERP running in minutes</p>
+    <h2 style="color:#fff;font-weight:700;margin-bottom:4px;">School ERP Installer</h2>
+    <p style="color:var(--i-muted);font-size:0.875rem;">Follow the steps to get your ERP running in minutes</p>
   </div>
 
   <!-- Steps bar -->
@@ -369,8 +431,8 @@ $steps_meta = [
 
     <!-- ════ STEP 1: Requirements ════ -->
     <?php if ($step === 1): ?>
-    <h4 style="font-family:'Playfair Display',serif;color:#fff;margin-bottom:20px;">
-      <i class="bi bi-clipboard2-check text-gold me-2" style="color:var(--gold)"></i>Server Requirements
+    <h4 style="color:#fff;font-weight:700;margin-bottom:20px;">
+      <i class="bi bi-clipboard2-check me-2" style="color:var(--i-gold)"></i>Server Requirements
     </h4>
 
     <?php foreach ($reqs as [$name, $pass]): ?>
@@ -395,8 +457,8 @@ $steps_meta = [
 
     <!-- ════ STEP 2: Database ════ -->
     <?php elseif ($step === 2): ?>
-    <h4 style="font-family:'Playfair Display',serif;color:#fff;margin-bottom:20px;">
-      <i class="bi bi-database me-2" style="color:var(--gold)"></i>Database Configuration
+    <h4 style="color:#fff;font-weight:700;margin-bottom:20px;">
+      <i class="bi bi-database me-2" style="color:var(--i-gold)"></i>Database Configuration
     </h4>
     <form method="POST">
       <div class="mb-3">
@@ -440,14 +502,14 @@ $steps_meta = [
 
     <!-- ════ STEP 3: Import SQL ════ -->
     <?php elseif ($step === 3): ?>
-    <h4 style="font-family:'Playfair Display',serif;color:#fff;margin-bottom:20px;">
-      <i class="bi bi-cloud-upload me-2" style="color:var(--gold)"></i>Import Database
+    <h4 style="color:#fff;font-weight:700;margin-bottom:20px;">
+      <i class="bi bi-cloud-upload me-2" style="color:var(--i-gold)"></i>Import Database
     </h4>
-    <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:24px;">
-      This will import all 18 tables, default classes, subjects, and settings from
+    <p style="color:var(--i-muted);font-size:0.9rem;margin-bottom:24px;">
+      This will import all 21 tables, default classes, subjects, and settings from
       <code>database.sql</code> into your database.
       <br><br>
-      <strong style="color:var(--gold);">⚠ This will overwrite any existing data in the database.</strong>
+      <strong style="color:var(--i-gold);">⚠ This will overwrite any existing data in the database.</strong>
     </p>
     <div class="req-row mb-3">
       <span class="name">database.sql</span>
@@ -470,8 +532,8 @@ $steps_meta = [
 
     <!-- ════ STEP 4: Admin Account ════ -->
     <?php elseif ($step === 4): ?>
-    <h4 style="font-family:'Playfair Display',serif;color:#fff;margin-bottom:20px;">
-      <i class="bi bi-person-fill-lock me-2" style="color:var(--gold)"></i>Create Admin Account
+    <h4 style="color:#fff;font-weight:700;margin-bottom:20px;">
+      <i class="bi bi-person-fill-lock me-2" style="color:var(--i-gold)"></i>Create Admin Account
     </h4>
     <form method="POST">
       <div class="mb-3">
@@ -507,22 +569,22 @@ $steps_meta = [
     <?php elseif ($step === 5): ?>
     <div class="text-center py-2">
       <div style="font-size:4rem;margin-bottom:16px;">🎉</div>
-      <h3 style="font-family:'Playfair Display',serif;color:#fff;margin-bottom:8px;">
+      <h3 style="color:#fff;font-weight:700;margin-bottom:8px;">
         Installation Complete!
       </h3>
-      <p style="color:var(--text-muted);margin-bottom:28px;">
+      <p style="color:var(--i-muted);margin-bottom:28px;">
         Your School ERP is ready. Please delete or secure the
         <code>/install</code> folder to prevent re-running.
       </p>
 
-      <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:12px;padding:16px;margin-bottom:24px;text-align:left;font-size:0.85rem;color:#4ade80;">
+      <div class="success-box" style="text-align:left;">
         <i class="bi bi-shield-check me-2"></i>
         <strong>Security reminder:</strong> Delete or rename the <code>/install</code> folder from your server now.
       </div>
 
-      <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:28px;text-align:left;">
-        <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em;">Login Credentials</div>
-        <div style="color:var(--text-main);font-size:0.875rem;">
+      <div class="creds-box" style="text-align:left;">
+        <div class="creds-label">Login Credentials</div>
+        <div class="creds-text">
           <strong>Admin URL:</strong> <code><?= htmlspecialchars($_SESSION['inst_site_url'] ?? '') ?>/admin/login.php</code><br>
           <strong>Student/Teacher URL:</strong> <code><?= htmlspecialchars($_SESSION['inst_site_url'] ?? '') ?>/auth/login.php</code>
         </div>
