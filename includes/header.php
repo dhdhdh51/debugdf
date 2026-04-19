@@ -81,13 +81,13 @@ $notifs = get_notifications(8);
 </head>
 <body>
 
-<!-- ── Sidebar Overlay ── -->
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <!-- ── Navbar ── -->
 <nav class="app-navbar">
-  <!-- Hamburger (mobile) -->
-  <button class="hamburger-btn" id="hamburgerBtn" type="button" aria-label="Toggle menu">
+  <!-- Hamburger (mobile only — Bootstrap offcanvas trigger) -->
+  <button class="hamburger-btn d-lg-none" type="button"
+          data-bs-toggle="offcanvas" data-bs-target="#appSidebar"
+          aria-controls="appSidebar" aria-label="Toggle menu">
     <i class="bi bi-list fs-5"></i>
   </button>
 
@@ -177,37 +177,49 @@ $notifs = get_notifications(8);
   </div>
 </nav>
 
-<!-- ── Sidebar ── -->
-<aside class="app-sidebar" id="appSidebar">
-  <?php
-  $prev_was_section = false;
-  foreach ($nav_items as $item):
-    if (isset($item['section'])):
-  ?>
-  <div class="sidebar-section <?= $prev_was_section ? 'mt-2' : '' ?>"><?= $item['section'] ?></div>
-  <?php
-      $prev_was_section = true;
-      continue;
-    endif;
-    $is_active = (
-      $item['url'] === '/admin/' || $item['url'] === '/student/' ||
-      $item['url'] === '/teacher/' || $item['url'] === '/parent/'
-    )
-      ? (rtrim(parse_url($current_path, PHP_URL_PATH), '/') === rtrim($item['url'], '/'))
-      : str_contains($current_path, $item['url']);
-    $prev_was_section = false;
-  ?>
-  <a href="<?= SITE_URL . $item['url'] ?>"
-     class="sidebar-link <?= $is_active ? 'active' : '' ?>">
-    <i class="bi bi-<?= $item['icon'] ?>"></i>
-    <span><?= $item['label'] ?></span>
-  </a>
-  <?php endforeach; ?>
-  <div class="mt-3 mx-2" style="border-top:1px solid rgba(255,255,255,0.05);padding-top:12px;">
-    <a href="<?= SITE_URL ?>/auth/logout.php" class="sidebar-link danger">
-      <i class="bi bi-box-arrow-right"></i><span>Logout</span>
-    </a>
+<!-- ── Sidebar (Bootstrap Offcanvas on mobile, fixed on desktop) ── -->
+<aside class="offcanvas offcanvas-start app-sidebar" id="appSidebar" tabindex="-1">
+
+  <!-- Close button shown only on mobile -->
+  <div class="d-flex d-lg-none align-items-center justify-content-between px-3 py-2"
+       style="border-bottom:1px solid rgba(255,255,255,0.08);">
+    <span style="color:#fff;font-weight:700;font-size:0.9rem;"><?= sanitize($site_name) ?></span>
+    <button type="button" class="btn-close btn-close-white btn-sm"
+            data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
+
+  <!-- Nav links -->
+  <nav style="overflow-y:auto;flex:1;padding-bottom:20px;">
+    <?php
+    $prev_was_section = false;
+    foreach ($nav_items as $item):
+      if (isset($item['section'])):
+    ?>
+    <div class="sidebar-section <?= $prev_was_section ? 'mt-2' : '' ?>"><?= $item['section'] ?></div>
+    <?php
+        $prev_was_section = true;
+        continue;
+      endif;
+      $is_active = (
+        $item['url'] === '/admin/' || $item['url'] === '/student/' ||
+        $item['url'] === '/teacher/' || $item['url'] === '/parent/'
+      )
+        ? (rtrim(parse_url($current_path, PHP_URL_PATH), '/') === rtrim($item['url'], '/'))
+        : str_contains($current_path, $item['url']);
+      $prev_was_section = false;
+    ?>
+    <a href="<?= SITE_URL . $item['url'] ?>"
+       class="sidebar-link <?= $is_active ? 'active' : '' ?>">
+      <i class="bi bi-<?= $item['icon'] ?>"></i>
+      <span><?= $item['label'] ?></span>
+    </a>
+    <?php endforeach; ?>
+    <div class="mt-3 mx-2" style="border-top:1px solid rgba(255,255,255,0.05);padding-top:12px;">
+      <a href="<?= SITE_URL ?>/auth/logout.php" class="sidebar-link danger">
+        <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+      </a>
+    </div>
+  </nav>
 </aside>
 
 <!-- ── Main Content ── -->
