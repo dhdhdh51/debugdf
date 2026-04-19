@@ -175,11 +175,12 @@ code {
   background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--text-muted);
-  display: flex; align-items: center; justify-content: center;
+  align-items: center; justify-content: center;
   cursor: pointer;
   transition: all var(--tr);
   display: none;
 }
+.hamburger-btn:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
 @media (max-width: 991px) { .hamburger-btn { display: flex; } }
 
 /* ── Sidebar ── */
