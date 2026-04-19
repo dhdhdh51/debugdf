@@ -87,7 +87,7 @@ $notifs = get_notifications(8);
 <!-- ── Navbar ── -->
 <nav class="app-navbar">
   <!-- Hamburger (mobile) -->
-  <button class="hamburger-btn" id="hamburgerBtn">
+  <button class="hamburger-btn" id="hamburgerBtn" type="button" aria-label="Toggle menu">
     <i class="bi bi-list fs-5"></i>
   </button>
 
